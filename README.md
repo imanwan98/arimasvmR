@@ -78,9 +78,7 @@ svm_tune <- tune.svm(
   epsilon = seq(0, 1, 0.1),
   kernel = "radial"
 )
-# - best parameters:
-# gamma cost epsilon
-# 2     256  0.4
+
 svm_model <- svm_tune$best.model
 
 svm_pred <- fitted(svm_model)
