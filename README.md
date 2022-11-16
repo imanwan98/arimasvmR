@@ -23,7 +23,7 @@ covid_12$Date <- as.Date(covid_12$Date)
 train <- data.frame(covid_12[1:612,])
 test <- data.frame(covid_12[613:765,])
 
-#Plot Original Series
+# Plot Original Series
 graph <- ggplot(data = covid_12) +
   ggtitle("Plot Original Series of Daily New_Recovered Cases") +
   theme(text=element_text(size=12,  family="serif"))+
