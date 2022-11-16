@@ -135,8 +135,7 @@ label1 <- "Actual data"
 label9 <- "ARIMA model"
 label3 <- "SVMs"
 label14 <- "ARIMA-SVMs"
-label5 <- "LSSVMs"
-label10 <- "ARIMA-LSSVMs"
+
 
 graph <- ggplot(train) +
   ggtitle("                      New_Recovered Cases") +
@@ -148,10 +147,7 @@ graph <- ggplot(train) +
   geom_point(aes(x = Date, y = svm_pred, colour = label3), size = 0.5) +
   geom_line(aes(x = Date, y = hybrid_pred, colour = label14), linetype = 2) +
   geom_point(aes(x = Date, y = hybrid_pred, colour = label14), size = 0.5) +
-  geom_line(aes(x = Date, y = predictlssvm, colour = label5), linetype = 2) +
-  geom_point(aes(x = Date, y = predictlssvm, colour = label5), size = 0.5) +
-  geom_line(aes(x = Date, y = hybrid_pred1 , colour = label10), linetype = 2) +
-  geom_point(aes(x = Date, y = hybrid_pred1 , colour = label10), size = 0.5) +
+
   scale_x_date("Date") +
   ylab("Num of Cases")
 graph$labels$colour <- "Legend"
