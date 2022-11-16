@@ -13,21 +13,19 @@ library(lmtest)
 
 # Insert Data
 library(readxl)
-covid_12 <- read_excel("C:/Users/coding/covid 12.xlsx")
-View(covid_12)
-plot(covid_12,type='l')
+data <- read_excel("C:/Users/coding/data.xlsx")
+View(data)
+plot(data,type='l')
 
-covid_12$Date <- as.Date(covid_12$Date)
+data$Date <- as.Date(data$Date)
 
-# Separation to train and test data
-train <- data.frame(covid_12[1:612,])
-test <- data.frame(covid_12[613:765,])
+train <- data.frame(data[1:612,])
+test <- data.frame(data[613:765,])
 
-# Plot Original Series
-graph <- ggplot(data = covid_12) +
+graph <- ggplot(data = data) +
   ggtitle("Plot Original Series of Daily New_Recovered Cases") +
   theme(text=element_text(size=12,  family="serif"))+
-  geom_line(aes(Date, New_Recovered)) + scale_x_date('month')
+  geom_line(aes(Date, Covid)) + scale_x_date('month')
 
 ggsave(
   filename = "original.png",
@@ -38,7 +36,7 @@ ggsave(
 plot(graph)
 
 # Time series data
-ts_data <- ts(train[, c('New_Recovered')])
+ts_data <- ts(train[, c('covid')])
 
 # Check stationarity of time series data
 adf.test(ts_data,"stationary")
@@ -56,7 +54,7 @@ arima_seasonal <- auto.arima(ts_data)
 arima_seasonal_pred <- fitted(arima_seasonal)
 
 # Diagonistic Checking
-res <-residuals(ARIMA)
+res <-residuals(arima_seasonal)
 res_plot <- autoplot(res) + ggtitle("Residuals from ARIMA") +
  geom_point() + xlab("Day") + ylab("") +
  theme(text = element_text(family = "Times New Roman", size = 12))
@@ -73,8 +71,8 @@ Box.test(res,lag = 10, fitdf = 0, type = "Lj")
 
 # SVM model
 svm_tune <- tune.svm(
-  ts_data ~ train$Date,
-  data = train,
+  ts_data ~ data$Date,
+  data = data,
   gamma = 10 ^ (-1:1),
   cost = 10 ^ (2:8),
   epsilon = seq(0, 1, 0.1),
@@ -91,7 +89,7 @@ plot(arima_residuals)
 
 r=residuals(arima_seasonal)
 
-autoplot(r)+ggtitle("Residuals from ARIMA(2,1,2)")+geom_point()+xlab("Day")+ylab("")+ theme(text=element_text(family="Times New Roman", size=12))
+autoplot(r)+ggtitle("Residuals from ARIMA")+geom_point()+xlab("Day")+ylab("")+ theme(text=element_text(family="Times New Roman", size=12))
 gghistogram(r)+ggtitle("Histogram of residuals")+xlab("residuals")+theme(text=element_text(family="Times New Roman", size=12))
 ggAcf(r)+ggtitle("ACF of residuals")+theme(text=element_text(family="Times New Roman", size=12))
 
@@ -99,7 +97,7 @@ ggAcf(r)+ggtitle("ACF of residuals")+theme(text=element_text(family="Times New R
 # Regress ARIMA residuals using SVMs
 arima_res_svm_tune <- tune.svm(
   arima_residuals ~ arima_seasonal_pred,
-  data = train,
+  data = data,
   gamma = 2 ^ (-1:1),
   cost = 2 ^ (2:11),
   epsilon = seq(0, 1, 0.1),
@@ -137,10 +135,10 @@ label3 <- "SVMs"
 label14 <- "ARIMA-SVMs"
 
 
-graph <- ggplot(train) +
-  ggtitle("                      New_Recovered Cases") +
+graph <- ggplot(data) +
+  ggtitle("                      Covid Cases") +
   theme(text=element_text(size=12,  family="serif"))+
-  geom_line(aes(x = Date, y = New_Recovered, colour = label1), size = .4) +
+  geom_line(aes(x = Date, y = covid, colour = label1), size = .4) +
   geom_line(aes(x = Date, y = arima_seasonal_pred, colour = label9), linetype = 2) +
   geom_point(aes(x = Date, y = arima_seasonal_pred, colour = label9), size = 0.5) +
   geom_line(aes(x = Date, y = svm_pred, colour = label3), linetype = 2) +
@@ -149,7 +147,7 @@ graph <- ggplot(train) +
   geom_point(aes(x = Date, y = hybrid_pred, colour = label14), size = 0.5) +
 
   scale_x_date("Date") +
-  ylab("Num of Cases")
+  ylab("covid")
 graph$labels$colour <- "Legend"
 
 
@@ -164,20 +162,20 @@ plot(graph)
 
 
 # Calculate MAE, MAPE, MSE, RMSE for each model
-arima_mae <- mae(train$New_Recovered, arima_seasonal_pred)
-arima_mape <- mape(train$New_Recovered, arima_seasonal_pred)
-arima_mse <- mse(train$New_Recovered, arima_seasonal_pred)
-arima_rmse <- rmse(train$New_Recovered, arima_seasonal_pred)
+arima_mae <- mae(data$covid, arima_seasonal_pred)
+arima_mape <- mape(data$covid,, arima_seasonal_pred)
+arima_mse <- mse(data$covid,, arima_seasonal_pred)
+arima_rmse <- rmse(data$covid,, arima_seasonal_pred)
 
-svm_mae <- mae(train$New_Recovered, svm_pred)
-svm_mape <- mape(train$New_Recovered, svm_pred)
-svm_mse <- mse(train$New_Recovered, svm_pred)
-svm_rmse <- rmse(train$New_Recovered, svm_pred)
+svm_mae <- mae(data$covid,, svm_pred)
+svm_mape <- mape(data$covid,, svm_pred)
+svm_mse <- mse(data$covid,, svm_pred)
+svm_rmse <- rmse(data$covid,, svm_pred)
 
-hybrid_mae <- mae(train$New_Recovered, hybrid_pred)
-hybrid_mape <- mape(train$New_Recovered, hybrid_pred)
-hybrid_mse <- mse(train$New_Recovered, hybrid_pred)
-hybrid_rmse <- rmse(train$New_Recovered, hybrid_pred)
+hybrid_mae <- mae(data$covid,, hybrid_pred)
+hybrid_mape <- mape(data$covid,, hybrid_pred)
+hybrid_mse <- mse(data$covid,, hybrid_pred)
+hybrid_rmse <- rmse(data$covid,, hybrid_pred)
 
 indices <- data.frame(
   "MAE" = c(arima_mae, svm_mae, hybrid_mae),
