@@ -36,7 +36,7 @@ ggsave(
 plot(graph)
 
 # Time series data
-ts_data <- ts(train[, c('covid')])
+ts_data <- ts(data[, c('covid')])
 
 # Check stationarity of time series data
 adf.test(ts_data,"stationary")
