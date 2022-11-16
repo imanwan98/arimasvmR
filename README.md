@@ -1,4 +1,3 @@
-# R Packages
 library('ggplot2')
 library('forecast')
 library('tseries')
@@ -10,9 +9,8 @@ library(survminer)
 library(survival)
 library(hydroGOF)
 library(lmtest)
-
-# Insert Data
 library(readxl)
+
 data <- read_excel("C:/Users/coding/data.xlsx")
 View(data)
 plot(data,type='l')
@@ -35,25 +33,16 @@ ggsave(
 )
 plot(graph)
 
-# Time series data
 ts_data <- ts(data[, c('covid')])
-
-# Check stationarity of time series data
 adf.test(ts_data,"stationary")
-
-# Turning data into stationary
 ts_stationary<-diff(ts_data)
 plot(ts_stationary)
 adf.test(ts_stationary)
-
-# Determine the p and q parameter
 ts_data %>% diff() %>% ggtsdisplay(main="") # plot diff(),acf,pacf
 
-# Fit best ARIMA
 arima_seasonal <- auto.arima(ts_data)
 arima_seasonal_pred <- fitted(arima_seasonal)
 
-# Diagonistic Checking
 res <-residuals(arima_seasonal)
 res_plot <- autoplot(res) + ggtitle("Residuals from ARIMA") +
  geom_point() + xlab("Day") + ylab("") +
@@ -64,12 +53,8 @@ res_acf <- ggAcf(res) + ggtitle("ACF of residuals") +
  theme(text = element_text(family = "Times New Roman", size = 12))
 
 coeftest(arima_seasonal)
-
-# Ljung-Box test to check residuals
 Box.test(res,lag = 10, fitdf = 0, type = "Lj")
 
-
-# SVM model
 svm_tune <- tune.svm(
   ts_data ~ data$Date,
   data = data,
@@ -80,10 +65,8 @@ svm_tune <- tune.svm(
 )
 
 svm_model <- svm_tune$best.model
-
 svm_pred <- fitted(svm_model)
 
-# Calculate residuals
 arima_residuals = residuals(arima_seasonal)
 plot(arima_residuals)
 
@@ -93,8 +76,6 @@ autoplot(r)+ggtitle("Residuals from ARIMA")+geom_point()+xlab("Day")+ylab("")+ t
 gghistogram(r)+ggtitle("Histogram of residuals")+xlab("residuals")+theme(text=element_text(family="Times New Roman", size=12))
 ggAcf(r)+ggtitle("ACF of residuals")+theme(text=element_text(family="Times New Roman", size=12))
 
-
-# Regress ARIMA residuals using SVMs
 arima_res_svm_tune <- tune.svm(
   arima_residuals ~ arima_seasonal_pred,
   data = data,
@@ -104,16 +85,10 @@ arima_res_svm_tune <- tune.svm(
   kernel = "radial"
 )
 
-# Create the best SVM model for residuals
 arima_res_svm = arima_res_svm_tune$best.model
-
-# Implementation of the model - fit regressed points
 arima_res_svm_pred <- predict(arima_res_svm)
 
-# Key formula
 hybrid_pred <- ts_data + arima_res_svm_pred
-
-# Plot residuals
 graph <- ggplot() +
   geom_point(aes(x = arima_seasonal_pred, y = arima_residuals, colour = "ARIMA residuals")) +
   geom_point(aes(x = arima_seasonal_pred, y = arima_res_svm_pred, colour = "SVM of residuals"))
@@ -128,12 +103,10 @@ plot(graph)
 plot(residuals_arima)
 
 
-# Plot the graph
 label1 <- "Actual data"
 label9 <- "ARIMA model"
 label3 <- "SVMs"
 label14 <- "ARIMA-SVMs"
-
 
 graph <- ggplot(data) +
   ggtitle("                      Covid Cases") +
@@ -160,8 +133,6 @@ ggsave(
 
 plot(graph)
 
-
-# Calculate MAE, MAPE, MSE, RMSE for each model
 arima_mae <- mae(data$covid, arima_seasonal_pred)
 arima_mape <- mape(data$covid,, arima_seasonal_pred)
 arima_mse <- mse(data$covid,, arima_seasonal_pred)
