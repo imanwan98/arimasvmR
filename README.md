@@ -1,3 +1,4 @@
+# R Packages
 library('ggplot2')
 library('forecast')
 library('tseries')
@@ -10,7 +11,7 @@ library(survival)
 library(hydroGOF)
 library(lmtest)
 
-
+# Insert Data
 library(readxl)
 covid_12 <- read_excel("C:/Users/coding/covid 12.xlsx")
 View(covid_12)
@@ -22,7 +23,7 @@ covid_12$Date <- as.Date(covid_12$Date)
 train <- data.frame(covid_12[1:612,])
 test <- data.frame(covid_12[613:765,])
 
-
+#Plot Original Series
 graph <- ggplot(data = covid_12) +
   ggtitle("Plot Original Series of Daily New_Recovered Cases") +
   theme(text=element_text(size=12,  family="serif"))+
@@ -50,6 +51,7 @@ adf.test(ts_stationary)
 # Determine the p and q parameter
 ts_data %>% diff() %>% ggtsdisplay(main="") # plot diff(),acf,pacf
 
+# Fit best ARIMA
 arima_seasonal <- auto.arima(ts_data)
 arima_seasonal_pred <- fitted(arima_seasonal)
 
@@ -128,6 +130,7 @@ plot(graph)
 plot(residuals_arima)
 
 
+# Plot the graph
 label1 <- "Actual data"
 label9 <- "ARIMA model"
 label3 <- "SVMs"
@@ -135,7 +138,6 @@ label14 <- "ARIMA-SVMs"
 label5 <- "LSSVMs"
 label10 <- "ARIMA-LSSVMs"
 
-# Plot the graph
 graph <- ggplot(train) +
   ggtitle("                      New_Recovered Cases") +
   theme(text=element_text(size=12,  family="serif"))+
